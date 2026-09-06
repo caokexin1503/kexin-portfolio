@@ -1,0 +1,244 @@
+// Prisma schema for Kexin Cao's personal portfolio platform.
+// See README.md "Architecture" section for the reasoning behind key decisions
+// (technologies as a native array, ProjectResource/ProjectMedia as flexible
+// join tables instead of fixed URL columns).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+
+// Single-administrator model. There is intentionally no public registration
+// flow anywhere in the app; this row is created once by `prisma/seed.ts`
+// using ADMIN_EMAIL / ADMIN_PASSWORD from the environment.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ---------------------------------------------------------------------------
+// Projects — the heart of the site
+// ---------------------------------------------------------------------------
+
+enum ProjectCategory {
+  ARTIFICIAL_INTELLIGENCE
+  MACHINE_LEARNING
+  COMPUTER_VISION
+  SOFTWARE_ENGINEERING
+  WEB_DEVELOPMENT
+  GAME_DEVELOPMENT
+  DATA_SCIENCE
+  RESEARCH
+  OTHER
+}
+
+enum ProjectStatus {
+  COMPLETED
+  IN_PROGRESS
+  ARCHIVED
+}
+
+model Project {
+  id               String          @id @default(cuid())
+  title            String
+  slug             String          @unique
+  shortDescription String
+  // Full technical case-study body, written in Markdown. Authors are free to
+  // structure it with their own headings (Overview / Motivation / Problem /
+  // Approach / Implementation / Architecture / Challenges / Lessons Learned /
+  // Future Improvements) — this avoids ten rigid DB columns for prose that
+  // not every project needs in the same shape.
+  content          String          @default("")
+  category         ProjectCategory
+  status           ProjectStatus   @default(IN_PROGRESS)
+  featured         Boolean         @default(false)
+  published        Boolean         @default(false)
+  technologies     String[]        @default([])
+  startDate        DateTime?
+  endDate          DateTime?
+  coverImage       String?
+
+  results          ProjectResult[]
+  resources        ProjectResource[]
+  media            ProjectMedia[]
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([published, featured])
+  @@index([category])
+}
+
+// Quantitative result cards ("+8pp mAP", "-21% GPU memory") shown on the
+// project detail page. Kept structured (rather than buried in Markdown
+// prose) so the UI can render them as clean metric cards per spec.
+model ProjectResult {
+  id           String  @id @default(cuid())
+  projectId    String
+  project      Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  metric       String
+  value        String
+  note         String?
+  displayOrder Int     @default(0)
+
+  @@index([projectId])
+}
+
+enum ResourceType {
+  GITHUB
+  LIVE_DEMO
+  VIDEO
+  DOCUMENTATION
+  DOWNLOAD
+  OTHER
+}
+
+// Flexible external-resource links. Preferred over fixed githubUrl/liveDemoUrl/...
+// columns on Project because not every project has a live demo, and some
+// projects need more than one link of the same kind (e.g. two download builds).
+model ProjectResource {
+  id           String       @id @default(cuid())
+  projectId    String
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type         ResourceType
+  title        String
+  url          String
+  displayOrder Int          @default(0)
+
+  @@index([projectId])
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+}
+
+// Gallery items shown in the project's screenshot/media lightbox.
+// The project's single cover image is stored on Project.coverImage instead
+// (every project has exactly one, so a join table would add no value there).
+model ProjectMedia {
+  id           String    @id @default(cuid())
+  projectId    String
+  project      Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  type         MediaType
+  url          String
+  title        String?
+  altText      String?
+  caption      String?
+  displayOrder Int       @default(0)
+
+  @@index([projectId])
+}
+
+// ---------------------------------------------------------------------------
+// Experience / Education / Skills
+// ---------------------------------------------------------------------------
+
+model Experience {
+  id           String    @id @default(cuid())
+  company      String
+  position     String
+  location     String?
+  startDate    DateTime
+  endDate      DateTime?
+  current      Boolean   @default(false)
+  description  String    @default("")
+  technologies String[]  @default([])
+  achievements String[]  @default([])
+  displayOrder Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Education {
+  id                  String    @id @default(cuid())
+  institution         String
+  degree              String
+  program             String?
+  location            String?
+  startDate           DateTime
+  endDate             DateTime?
+  expectedGraduation  DateTime?
+  description         String?
+  courses             String[]  @default([])
+  displayOrder        Int       @default(0)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+}
+
+enum SkillCategory {
+  PROGRAMMING_LANGUAGES
+  AI_MACHINE_LEARNING
+  COMPUTER_VISION
+  WEB_DEVELOPMENT
+  DEVELOPER_TOOLS
+  GAME_DEVELOPMENT
+  OTHER
+}
+
+// Deliberately no 0-100 numeric "skill level" — that invites exaggeration.
+// A small honest enum instead.
+enum SkillLevel {
+  LEARNING
+  FAMILIAR
+  PROFICIENT
+  ADVANCED
+}
+
+model Skill {
+  id           String        @id @default(cuid())
+  name         String
+  category     SkillCategory
+  level        SkillLevel    @default(FAMILIAR)
+  icon         String?
+  displayOrder Int           @default(0)
+}
+
+// Contact form submissions. Storing them in the database (rather than
+// sending email) means no SMTP/email-provider credentials need to exist
+// anywhere in the app — the admin simply reads messages from /admin/messages.
+model ContactMessage {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+// ---------------------------------------------------------------------------
+// Site-wide settings (singleton row)
+// ---------------------------------------------------------------------------
+
+// Single row (id is always "singleton"). Holds identity, bio, social links,
+// and SEO defaults — all editable from /admin/settings so nothing is
+// hard-coded across components.
+model SiteSettings {
+  id                 String   @id @default("singleton")
+  name               String   @default("Kexin Cao")
+  headline           String   @default("Computer Science Student | Artificial Intelligence | Computer Vision")
+  bio                String   @default("")
+  email              String   @default("caokexin5632@gmail.com")
+  githubUrl          String?
+  linkedinUrl        String?
+  twitterUrl         String?
+  websiteUrl         String?
+  profilePhoto       String?
+  seoTitle           String   @default("Kexin Cao — AI & Computer Vision Portfolio")
+  seoDescription     String   @default("Computer Science student building projects in AI, Computer Vision, and software engineering.")
+  favicon            String?
+  updatedAt          DateTime @updatedAt
+}

@@ -1,26 +1,228 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0a0a0a;
+  --surface: #fafafa;
+  --surface-hover: #f0f0f1;
+  --border: #e5e5e5;
+  --muted: #6b7280;
+  --accent: #2563eb;
+  --accent-foreground: #ffffff;
+  --accent-soft: #eff4ff;
+  --ring: #2563eb;
+  --code-bg: #f5f5f5;
+}
+
+.dark {
+  --background: #0a0a0b;
+  --foreground: #f2f2f3;
+  --surface: #141416;
+  --surface-hover: #1c1c1f;
+  --border: #262629;
+  --muted: #9a9aa2;
+  --accent: #5b9bff;
+  --accent-foreground: #0a0a0b;
+  --accent-soft: #16223f;
+  --ring: #5b9bff;
+  --code-bg: #17171a;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-soft: var(--accent-soft);
+  --color-ring: var(--ring);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.bg-dot-grid {
+  background-image: radial-gradient(var(--border) 1px, transparent 1px);
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 40%, transparent 100%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black 40%, transparent 100%);
+}
+
+.font-serif-display {
+  font-family: var(--font-fraunces), Georgia, serif;
+  font-optical-sizing: auto;
+}
+
+/* Subtle archival grain, used only in the Philosophy section — pure CSS,
+   no image request, negligible cost. */
+.bg-grain {
+  position: relative;
+  isolation: isolate;
+}
+.bg-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* Negative z-index (contained by .bg-grain's `isolation: isolate` above)
+     instead of forcing `position: relative` onto every direct child — that
+     previously broke any child using `fixed` positioning (e.g. a full-screen
+     overlay), since `.bg-grain > *` matches ALL direct children indiscriminately. */
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out both;
+}
+
+/* Markdown / rich content typography for project case studies */
+.prose-portfolio {
+  color: var(--foreground);
+  max-width: 72ch;
+  line-height: 1.75;
+}
+.prose-portfolio h2 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+.prose-portfolio h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+.prose-portfolio p {
+  margin-top: 0;
+  margin-bottom: 1.1rem;
+  color: var(--foreground);
+}
+.prose-portfolio ul,
+.prose-portfolio ol {
+  margin-bottom: 1.1rem;
+  padding-left: 1.4rem;
+}
+.prose-portfolio li {
+  margin-bottom: 0.4rem;
+}
+.prose-portfolio ul {
+  list-style: disc;
+}
+.prose-portfolio ol {
+  list-style: decimal;
+}
+.prose-portfolio a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-portfolio strong {
+  font-weight: 600;
+}
+.prose-portfolio blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 1rem;
+  margin: 1.5rem 0;
+  color: var(--muted);
+  font-style: italic;
+}
+.prose-portfolio code {
+  background: var(--code-bg);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+}
+.prose-portfolio pre {
+  background: var(--code-bg);
+  padding: 1rem 1.25rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--border);
+}
+.prose-portfolio pre code {
+  background: none;
+  padding: 0;
+}
+.prose-portfolio table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.25rem;
+  display: block;
+  overflow-x: auto;
+}
+.prose-portfolio th,
+.prose-portfolio td {
+  border: 1px solid var(--border);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose-portfolio th {
+  background: var(--surface);
+  font-weight: 600;
+}
+.prose-portfolio img {
+  border-radius: 0.5rem;
+  border: 1px solid var(--border);
+}
+.prose-portfolio hr {
+  border-color: var(--border);
+  margin: 2rem 0;
 }
