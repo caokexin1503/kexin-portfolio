@@ -20,12 +20,18 @@ export default async function PhilosophyPage() {
 
   const projects = await prisma.project.findMany({
     where: { slug: { in: slugs }, published: true },
-    select: { slug: true, title: true, shortDescription: true, technologies: true },
+    select: {
+      slug: true,
+      title: true,
+      shortDescription: true,
+      technologies: true,
+      resources: { where: { type: "LIVE_DEMO" }, orderBy: { displayOrder: "asc" }, take: 1, select: { url: true } },
+    },
   });
 
   const projectsBySlug: Record<string, PhilosophyProjectSummary> = {};
-  for (const project of projects) {
-    projectsBySlug[project.slug] = project;
+  for (const { resources, ...project } of projects) {
+    projectsBySlug[project.slug] = { ...project, liveDemoUrl: resources[0]?.url };
   }
 
   return (
