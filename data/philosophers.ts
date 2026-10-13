@@ -13,6 +13,17 @@ export type Era = "Ancient" | "Medieval" | "Early Modern" | "Existential / Moder
 
 export type MapRegion = "greece" | "italy" | "france" | "germany" | "denmark" | "austria";
 
+// A public-domain painting shown on the left of the detail scene — either from
+// the philosopher's own era or one that paints the same idea. Philosophers
+// without one fall back to the stylized HistoricalMap.
+export interface Artwork {
+  src: string;
+  title: string;
+  artist: string;
+  year: string;
+  source: string; // Wikimedia Commons file page, for attribution
+}
+
 export interface Philosopher {
   id: string;
   name: string; // short form used on the timeline node, e.g. "Nietzsche"
@@ -27,6 +38,7 @@ export interface Philosopher {
   keyIdea: string; // short label, e.g. "CREATE YOUR OWN VALUES"
   interpretation: string; // personal, first-person framing — never a biography
   projectSlug?: string;
+  artwork?: Artwork;
 }
 
 export const philosophers: Philosopher[] = [
@@ -45,6 +57,13 @@ export const philosophers: Philosopher[] = [
     interpretation:
       "That's the whole design philosophy behind Chainsilience AI, the supply-chain risk platform I built with a team of four. We didn't want another black-box AI — every alert has to show its evidence, so a decision-maker can ask \"why does this matter?\" and actually get an answer before acting on it.",
     projectSlug: "chainsilience-ai",
+    artwork: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/David_-_The_Death_of_Socrates.jpg/1920px-David_-_The_Death_of_Socrates.jpg",
+      title: "The Death of Socrates",
+      artist: "Jacques-Louis David",
+      year: "1787",
+      source: "https://commons.wikimedia.org/wiki/File:David_-_The_Death_of_Socrates.jpg",
+    },
   },
   {
     id: "plato",
@@ -61,6 +80,13 @@ export const philosophers: Philosopher[] = [
     interpretation:
       "A camera frame is just pixels — shadows on a wall — until a model finds the real structure underneath. During my internship at SF Express, that's exactly what I spent a summer doing: teaching YOLOv8 to see past the raw image to the object that's actually there.",
     projectSlug: "yolov8-object-detection-optimization",
+    artwork: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/%22The_School_of_Athens%22_by_Raffaello_Sanzio_da_Urbino.jpg/1920px-%22The_School_of_Athens%22_by_Raffaello_Sanzio_da_Urbino.jpg",
+      title: "The School of Athens",
+      artist: "Raphael",
+      year: "1509–1511",
+      source: "https://commons.wikimedia.org/wiki/File:%22The_School_of_Athens%22_by_Raffaello_Sanzio_da_Urbino.jpg",
+    },
   },
   {
     id: "aristotle",
@@ -71,11 +97,19 @@ export const philosophers: Philosopher[] = [
     era: "Ancient",
     location: "Athens & Macedon, Greece",
     region: "greece",
-    clickable: false,
+    clickable: true,
     coreQuestion: "What does it mean to actually flourish — not just succeed once, but get better?",
-    keyIdea: "FLOURISH",
+    keyIdea: "EXCELLENCE IS A HABIT",
     interpretation:
-      "Eudaimonia isn't a single win, it's a practice. Every experiment I run, tune, and re-run is that same idea: improvement as a habit, not an event.",
+      "For Aristotle, character is built by what we repeatedly do — and the right choice depends on who is choosing. That's the shape of Aisle's Personalized Explore: a shopping agent that ranks for the person in front of it, then learns from every pick (+1) and every purchase (+2), so the \"For You\" feed keeps getting better as a habit, not a one-off.",
+    projectSlug: "aisle-personalized-explore",
+    artwork: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Rembrandt_-_Aristotle_with_a_Bust_of_Homer_-_Google_Art_Project.jpg/1920px-Rembrandt_-_Aristotle_with_a_Bust_of_Homer_-_Google_Art_Project.jpg",
+      title: "Aristotle with a Bust of Homer",
+      artist: "Rembrandt",
+      year: "1653",
+      source: "https://commons.wikimedia.org/wiki/File:Rembrandt_-_Aristotle_with_a_Bust_of_Homer_-_Google_Art_Project.jpg",
+    },
   },
   {
     id: "epicurus",
@@ -86,11 +120,19 @@ export const philosophers: Philosopher[] = [
     era: "Ancient",
     location: "Samos & Athens, Greece",
     region: "greece",
-    clickable: false,
-    coreQuestion: "What actually matters — the noise, or the people and ideas worth paying attention to?",
-    keyIdea: "VALUE WHAT CONNECTS US",
+    clickable: true,
+    coreQuestion: "What would it take to live without needless worry?",
+    keyIdea: "PEACE OF MIND",
     interpretation:
-      "Epicurus put friendship above almost everything else. Studying how influence and connection actually move through a network felt like a technical version of the same question.",
+      "Epicurus called it ataraxia — a calm that comes from removing the fears you don't need to carry. Letting an AI agent spend money is exactly that kind of fear, so Aisle's Recovery Engine is built to make it boring: one approval tap, signed mandates, origin locking, and deterministic checks before and after every purchase. The agent keeps working; you don't have to worry about it.",
+    projectSlug: "aisle-recovery-engine",
+    artwork: {
+      src: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Villa_of_Livia_-_Garden_fresco_001.jpg/1920px-Villa_of_Livia_-_Garden_fresco_001.jpg",
+      title: "Garden Room Fresco, Villa of Livia",
+      artist: "Roman, Prima Porta",
+      year: "c. 30–20 BCE",
+      source: "https://commons.wikimedia.org/wiki/File:Villa_of_Livia_-_Garden_fresco_001.jpg",
+    },
   },
   {
     id: "aquinas",

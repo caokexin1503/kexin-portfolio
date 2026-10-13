@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { XIcon } from "lucide-react";
 import type { Philosopher } from "@/data/philosophers";
 import { HistoricalMap } from "@/components/Philosophy/HistoricalMap";
+import { ArtworkBackdrop, ArtworkCaption } from "@/components/Philosophy/ArtworkBackdrop";
 import { PhilosopherPanel } from "@/components/Philosophy/PhilosopherPanel";
 import type { PhilosophyProjectSummary } from "@/components/Philosophy/PhilosophyProjectCard";
 
@@ -46,8 +47,14 @@ export function PhilosopherScene({
             onClick={onClose}
             className="absolute inset-0 h-full w-full cursor-default"
           >
-            <HistoricalMap region={philosopher.region} era={philosopher.era} location={philosopher.location} />
+            {philosopher.artwork ? (
+              <ArtworkBackdrop artwork={philosopher.artwork} />
+            ) : (
+              <HistoricalMap region={philosopher.region} era={philosopher.era} location={philosopher.location} />
+            )}
           </button>
+
+          {philosopher.artwork && <ArtworkCaption artwork={philosopher.artwork} />}
 
           <button
             type="button"

@@ -129,6 +129,28 @@ body {
   animation: fade-up 0.5s ease-out both;
 }
 
+/* Rice-paper ink palette for the shan shui pieces (Contact backdrop, home
+   page scroll). Children paint with these variables so dark mode inverts the
+   painting into light ink on a night ground. */
+.ink-paper {
+  --ink: #1f1d1b;
+  --mist: #ffffff;
+  --reed: #b58a4c;
+  --seal: #b5302a;
+  --paper: #fbf7ee;
+  --wash: #f6f4ee;
+  background: linear-gradient(to bottom, #ece9e1, #f4f2ec 50%, #e9e4d8);
+}
+.dark .ink-paper {
+  --ink: #dcd8cf;
+  --mist: #17191c;
+  --reed: #a07c48;
+  --seal: #c8463c;
+  --paper: #efe6d2;
+  --wash: #1c1e22;
+  background: linear-gradient(to bottom, #101113, #15171a 50%, #1b1d21);
+}
+
 /* Markdown / rich content typography for project case studies */
 .prose-portfolio {
   color: var(--foreground);

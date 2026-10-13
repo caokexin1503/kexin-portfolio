@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { aisleProjects, CHAINSILIENCE_LIVE_DEMO } from "./resume-projects";
 
 const prisma = new PrismaClient();
 
@@ -379,9 +380,19 @@ Built with a team of four; the platform was piloted with a real company during d
 ## Future Improvements
 
 - Integrate approved workflows with enterprise communication systems (e.g. Gmail) for AI-assisted execution while keeping a human in the approval loop
-- TODO: add source code link / live demo`,
+
+## Try It
+
+The platform is live at [chainsilience-ai.vercel.app](https://chainsilience-ai.vercel.app).`,
+      resources: {
+        create: [CHAINSILIENCE_LIVE_DEMO],
+      },
     },
   });
+
+  for (const project of aisleProjects) {
+    await prisma.project.create({ data: project });
+  }
 
   console.log("Projects seeded.");
 }

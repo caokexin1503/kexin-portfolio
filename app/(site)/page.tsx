@@ -5,7 +5,7 @@ import { getSiteSettings } from "@/lib/settings";
 import { Container } from "@/components/ui/Container";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { ButtonLink } from "@/components/ui/Button";
-import { Hero } from "@/components/home/Hero";
+import { InkScroll } from "@/components/home/InkScroll";
 import { ProjectGrid } from "@/components/projects/ProjectGrid";
 import { SkillList } from "@/components/skills/SkillList";
 import { formatDateRange } from "@/lib/utils";
@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 export default async function HomePage() {
   const settings = await getSiteSettings();
 
-  const [featuredProjects, skills, experiences] = await Promise.all([
+  const [featuredProjects, skills, allExperiences, education] = await Promise.all([
     prisma.project.findMany({
       where: { published: true, featured: true },
       orderBy: { createdAt: "desc" },
@@ -23,8 +23,10 @@ export default async function HomePage() {
       include: { resources: { select: { type: true, url: true } } },
     }),
     prisma.skill.findMany({ orderBy: [{ category: "asc" }, { displayOrder: "asc" }] }),
-    prisma.experience.findMany({ orderBy: { displayOrder: "asc" }, take: 2 }),
+    prisma.experience.findMany({ orderBy: { displayOrder: "asc" }, take: 3 }),
+    prisma.education.findFirst({ orderBy: { displayOrder: "asc" }, select: { institution: true, degree: true } }),
   ]);
+  const experiences = allExperiences.slice(0, 2);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -44,12 +46,21 @@ export default async function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <Hero
+      <InkScroll
         name={settings.name}
         headline={settings.headline}
         bio={settings.bio}
+        email={settings.email}
         githubUrl={settings.githubUrl}
         linkedinUrl={settings.linkedinUrl}
+        education={education}
+        projects={featuredProjects.map(({ slug, title, category }) => ({ slug, title, category }))}
+        experiences={allExperiences.map((exp) => ({
+          id: exp.id,
+          company: exp.company,
+          position: exp.position,
+          dates: formatDateRange(exp.startDate, exp.endDate, exp.current),
+        }))}
       />
 
       <Container className="py-20">
